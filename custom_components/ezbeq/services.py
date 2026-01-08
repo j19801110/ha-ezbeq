@@ -52,7 +52,20 @@ async def async_setup_services(
             await coordinator.client.load_beq_profile(search_request)
             _LOGGER.info("Successfully loaded BEQ profile")
         except Exception as e:
-            _LOGGER.error("Failed to load BEQ profile: %s", e)
+            # Surface HTTP details if available (non-breaking)
+            resp = getattr(e, "response", None)
+            if resp is not None:
+                try:
+                    _LOGGER.error(
+                        "Failed to load BEQ profile: %s (status=%s, body=%s)",
+                        e,
+                        getattr(resp, "status_code", "?"),
+                        getattr(resp, "text", "")[:800],
+                    )
+                except Exception:
+                    _LOGGER.error("Failed to load BEQ profile: %s (response present but unreadable)", e)
+            else:
+                _LOGGER.error("Failed to load BEQ profile: %s", e)
             raise HomeAssistantError(f"Failed to load BEQ profile: {e}") from e
 
     async def unload_beq_profile(call: ServiceCall) -> None:
@@ -70,7 +83,19 @@ async def async_setup_services(
             await coordinator.client.unload_beq_profile(search_request)
             _LOGGER.info("Successfully unloaded BEQ profile")
         except Exception as e:
-            _LOGGER.error("Failed to unload BEQ profile: %s", e)
+            resp = getattr(e, "response", None)
+            if resp is not None:
+                try:
+                    _LOGGER.error(
+                        "Failed to unload BEQ profile: %s (status=%s, body=%s)",
+                        e,
+                        getattr(resp, "status_code", "?"),
+                        getattr(resp, "text", "")[:800],
+                    )
+                except Exception:
+                    _LOGGER.error("Failed to unload BEQ profile: %s (response present but unreadable)", e)
+            else:
+                _LOGGER.error("Failed to unload BEQ profile: %s", e)
             raise HomeAssistantError(f"Failed to unload BEQ profile: {e}") from e
 
     hass.services.async_register(domain, "load_beq_profile", load_beq_profile)
