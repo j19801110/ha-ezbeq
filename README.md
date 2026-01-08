@@ -32,20 +32,25 @@ My recommendation would be to do the following:
 ### Example Template Sensor Definitions
 #### Template sensor for Title: 
 
+```yaml
 {% set full_title = state_attr('sensor.plex_session_1_tautulli', 'full_title') | string %}
           {{ full_title.split('[')[0] | trim if full_title is not none else 'Unknown' }}
+```
 
 #### TMDB ID:
 
+```yaml
 {% set guids = state_attr('sensor.plex_session_1_tautulli', 'guids') %}
           {% if guids is not none %}
             {{ guids | select('match', '^tmdb://') | first | replace('tmdb://', '') | string }}
           {% else %}
             unknown
           {% endif %}
+```
 
 #### Edition (when put into the title with [ ] brackets such as Aliens [Director's Cut])
 
+```yaml
 {% set title = state_attr('sensor.plex_session_1_tautulli', 'full_title') %}
           {% set pattern = '\[(.*?)\]' %}
           {% if title is not none and title is search(pattern) %}
@@ -53,9 +58,10 @@ My recommendation would be to do the following:
           {% else %}
             {{ '' }}
           {% endif %}
-
+```
 #### Codec:
 
+```yaml
 {% set codec_attr = state_attr('sensor.plex_session_1_tautulli', 'audio_codec') %}
 
 {# Check if the sensor has data; if not, return early #}
@@ -97,11 +103,11 @@ My recommendation would be to do the following:
     {{ (final_codec ~ ' ' ~ (layout if layout != 'None' else '')) | trim }}
   {% endif %}
 {% endif %}
-
+```
 #### Year: 
-
+```yaml
 {{ state_attr('sensor.plex_session_1_tautulli', 'year') | string }}
-
+```
 
 ## Services
 
