@@ -245,6 +245,12 @@ The automations must force an update to this sensor at the end of a successful l
 ### Displaying the BEQ image on the dashboard
 Use the following YAML to add a dashboard tile to display the BEQ profile image on your dashboard. This is helpful if you'd like to know what EQ is being applied at any moment, along with the profile name.
 
+## Configurable variables within the code (in folder integrations/ezbeq)
+You can only configure these variables by using a code editor addon within HA or using SSH. There are a number of .py (python) files that the intgeration runs to enable its logic. These files have some variables that are configurable which are listed here.
+
+1. File: init.py variable OVERRIDE_GAINS: by setting this True, MV volume changes are NOT applied to the MiniDSP Input channels. By setting this to false, MV volume changes will be applied. This is enabled by default, which means there will be NO volume changes on the inputs. Make sure you have limiters set on your MiniDSP output channels for safety.
+2. File Services.py, variable CATALOG_CACHE_TTL: this is the amount of time in seconds that the BEQ database is cached on HA before it is refreshed. Please note that this only affects the BEQ image currently, but might affect other anscillary data over time if this integration is developed further. It does not affect the main BEQ catalogue used for loading the profiles. The default is one week, but you can change this if you need to. Restarting HA will also reset the cache.
+
 ```yaml
 type: markdown
 content: |
