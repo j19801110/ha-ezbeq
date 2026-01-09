@@ -5,6 +5,7 @@ This is a fixed integration based on the brilliant work at https://github.com/il
 Fixes:
 - BEQ Profiles with no MV changes now load normally
 - MV changes are NOT loaded into the MiniDSP by default. However, this is configurable using a variable in _init_.py by setting OVERRIDE_GAINS: bool = False.
+
 New Features:
   - Ability to pull the main BEQ image from the database and dispay it on the dashboard (requires a new text input helper called 'ezbeq_tv_beq_image_url' so it becomes input_text.ezbeq_tv_beq_image_url)
 
