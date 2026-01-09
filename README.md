@@ -255,6 +255,9 @@ grid_options:
 ```
 
 ## Blueprints
+
+PLEASE NOTE: the below blueprints have not been updated since ezBEQ integration has been forked so they are now out of date. However, they are not needed for the integration to work. You can create your own automations based on the above code and ignore anything below this line. Blueprints really need to be included as part of the integration but haven't gotten round to integrating them.
+
 ### Load Blueprint
 
 You can add these blueprints to use in automations
