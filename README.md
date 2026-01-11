@@ -9,6 +9,7 @@ Fixes:
 New Features:
   - Ability to pull the main BEQ image from the database and dispay it on the dashboard (requires a new text input helper called 'ezbeq_tv_beq_image_url' so it becomes input_text.ezbeq_tv_beq_image_url).
   - Ability to search the catalogue based on audio codec substitutions defined in services.py IF the primary load fails to find a match. Can be enabled / disabled using enable_audio_codec_substitutions: true in the service call. Read more about this under Configurable Variables heading.
+  - Status updates are available by reading the attributes of a new sensor called sensor.ezbeq_load_status. 
 
 ## Example Images
 ### No profile loaded
@@ -44,6 +45,12 @@ My recommendation would be to do the following:
 3. Feed these into the ezBEQ integration using the template sensors you create.
 
 ### Example Template Sensor Definitions
+
+Required template sensors the following template sensors are required. While they can be names anything, they must match what you put in the service call that is defined later on in this guide. These template sensors need to provide the data into the service call to help with matching the correct movie. The TMDB ID, Audio codec and Movie Edition are required for matching. The other sensors are optional, but recommneded for troubleshooting at the very least.
+
+The below definitions are given as exmaples when using Tautulli Active Streams Home Assistant integration connected to your Plex server. However, if you are using a Zidoo integration for example, you can define these derived sensors becased on information (sensors) available from that integration.
+
+
 #### Template sensor for Title (Name: sensor.ezbeq_tv_title)
 
 ```yaml
@@ -62,7 +69,7 @@ My recommendation would be to do the following:
           {% endif %}
 ```
 
-#### Edition (when put into the title with [ ] brackets such as Aliens [Director's Cut])
+#### Movie Edition (when put into the title on Plex with [ ] brackets such as Aliens [Director's Cut])
 (Name: sensor.ezbeq_tv_edition)
 
 ```yaml
@@ -74,7 +81,7 @@ My recommendation would be to do the following:
             {{ '' }}
           {% endif %}
 ```
-#### Codec (name: sensor.ezbeq_tv_codec)
+#### Audio Codec (name: sensor.ezbeq_tv_codec)
 
 ```yaml
 {% set codec_attr = state_attr('sensor.plex_session_1_tautulli', 'audio_codec') %}
@@ -126,7 +133,7 @@ My recommendation would be to do the following:
 
 #### BEQ Image URL (name ezbeq_tv_beq_image_url)
 
-Create a text input helper with the name ezbeq_tv_beq_image_url so it becomes input_text.ezbeq_tv_beq_image_url in home assistant.
+Create a text input helper with the name ezbeq_tv_beq_image_url so it becomes input_text.ezbeq_tv_beq_image_url in home assistant. This will have the URL of the BEQ image for the actively loaded profile that you can use to display the image.
 
 #### EzBEQ Enable Button (name: ezbeq_enable)
 
@@ -158,8 +165,6 @@ data:
 
 `unload_beq_profile` does not need any data
 
-
-
 ## Adding Automations - Examples
 
 You can use the below examples for loading BEQ profiles and unloading them.
@@ -169,8 +174,7 @@ You can use the below examples for loading BEQ profiles and unloading them.
 The reason to use the audio track for executing changes is to simplify the loading code: by detecting change, we unload and then try to load again. This happens when starting a stream, changing audio tracks or stopping a stream.
 
 Please note the following:
-- set enable_audio_codec_substitutions: true if you want to allow for codec substitutions. This is needed for various reasons, but you can read more about this under the Configurable Variables heading in this guide.
-- 
+- set enable_audio_codec_substitutions: true if you want to allow for codec substitutions. This might be needed for various reasons, but you can read more about this under the Configurable Variables heading in this guide.
 
 ```yaml
 alias: ezBEQ - Audio Track Change
@@ -242,13 +246,74 @@ actions:
     action: homeassistant.update_entity
 mode: single
 ```
+## Dashboard Configuration
+
+I would recommend adding your created template sensors onto the dashboard for testing purposes at the very least. 
+Additionally, you can also add the following:
 
 ### Displaying the loaded Profile on the Dashboard
 
 Add the sensor 'master_current_profile' to the dashboard
-The automations must force an update to this sensor at the end of a successful load or unload otherwise the sensor only updates every 15-30 seconds.
+The automations must force an update to this sensor at the end of a successful load or unload otherwise the sensor only updates every 15-30 seconds. This forced refresh is included as part of the automation examples on this page.
 
-### Displaying the BEQ image on the dashboard
+### Dispalying the Loading Status on the Dashboard
+
+The integration tracks BEQ loading and unloading status including any reasons for a failure. This can help in tracking what is going on, but also to use automations that kick off due to a failure for example, or simply to send as a payload in a message. The loading status will go through the following stages:
+
+STATE VALUES
+- Idle
+- Unloading
+- Unload Success
+- Unload Fail (the reason field will be populated with the reason for the failure)
+- Loading – Primary
+- Loading – Secondary (codec substitutions)
+- Load Success
+- Load Fail (the reason field will be populated with the reason for the failure)
+
+You can add the following markdown card onto the dashboard to display the loading status and its attributes. Delete the lines you don't want to see.
+
+```yaml
+type: markdown
+title: ezBEQ Status
+content: |
+  **State:** {{ states('sensor.ezbeq_load_status') }}
+  **Author:** {{ state_attr('sensor.ezbeq_load_status', 'author') }}
+  **Codec:** {{ state_attr('sensor.ezbeq_load_status', 'codec') }}
+  **Slots:** {{ state_attr('sensor.ezbeq_load_status', 'slots') }}
+  **Reason:** {{ state_attr('sensor.ezbeq_load_status', 'reason') }}
+  **Updated:** {{ state_attr('sensor.ezbeq_load_status', 'last_changed') 
+  ```
+
+Alternatively, you can build the same using an entities card.
+
+```yaml
+type: entities
+title: ezBEQ Status
+entities:
+  - entity: sensor.ezbeq_load_status            # shows the state (e.g., load_success)
+  - type: attribute
+    entity: sensor.ezbeq_load_status
+    attribute: author
+    name: Author
+  - type: attribute
+    entity: sensor.ezbeq_load_status
+    attribute: reason
+    name: Reason
+  - type: attribute
+    entity: sensor.ezbeq_load_status
+    attribute: codec
+    name: Codec
+  - type: attribute
+    entity: sensor.ezbeq_load_status
+    attribute: slots
+    name: Slots
+  - type: attribute
+    entity: sensor.ezbeq_load_status
+    attribute: last_changed
+    name: Last changed
+```
+
+### Displaying the BEQ image on the Dashboard
 Use the following YAML to add a dashboard tile to display the BEQ profile image on your dashboard. This is helpful if you'd like to know what EQ is being applied at any moment, along with the profile name.
 
 ```yaml
