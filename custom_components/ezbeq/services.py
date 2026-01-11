@@ -24,18 +24,33 @@ CATALOG_CACHE_TTL = 7 * 24 * 3600  # 1 week
 SUBSTITUTION_RULES: List[Dict[str, Any]] = [
     {
         "enabled": True,
-        "inputs": ["Atmos", "TrueHD 7.1"],
-        "outputs": ["TrueHD 7.1", "dolby atmos"],
+        "inputs": ["Atmos"],
+        "outputs": ["TrueHD 7.1","TrueHD Atmos" ,"TrueHD 5.1","DD+ Atmos"],
     },
     {
         "enabled": True,
-        "inputs": ["dts-hd ma", "dts-hd ma 7.1", "dts:x", "dtsx", "dts-x"],
-        "outputs": ["dts-hd ma 7.1", "dts-hd ma 5.1", "dts-x", "dts:x", "dts-x hr", "dts.hd ma 5.1"],
+        "inputs": ["dts-hd ma 7.1"],
+        "outputs": ["dts-x", "dts:x", "dts-x hr", "dts-hd ma 5.1","dts.hd ma 5.1"],
     },
-     {
+    {
         "enabled": True,
         "inputs": ["DD+ 5.1", "DD+ 7.1", "DD+ 2.0", "DD+ 2.1"],
-        "outputs": ["DD+"],
+        "outputs": ["DD+", "DD+ Atmos", "DD+ 5.1 Atmos"],
+    },
+    {
+        "enabled": True,
+        "inputs": ["DTS 5.1", "DTS 6.1"],
+        "outputs": ["DTS-HD MA 5.1","DTS-HD MA 7.1", "DTS-ES 5.1", "DTS-ES 6.1", "DTS-EX 5.1"],
+    },
+    {
+        "enabled": True,
+        "inputs": ["DTS-HD MA 5.1", "DTS-HD MA 7.1"],
+        "outputs": ["DTS-HD MA 5.1","DTS-HD MA 7.1"],
+    },
+    {
+        "enabled": True,
+        "inputs": ["PCM"],
+        "outputs": ["LPCM 5.1","LPCM 7.1","LPCM 2.0","LPCM 1.0"],
     },
     # Add more rules here as needed.
 ]
