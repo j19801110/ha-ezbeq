@@ -9,7 +9,8 @@ Fixes:
 New Features:
   - Ability to pull the main BEQ image from the database and dispay it on the dashboard (requires a new text input helper called 'ezbeq_tv_beq_image_url' so it becomes input_text.ezbeq_tv_beq_image_url).
   - Ability to search the catalogue based on audio codec substitutions defined in services.py IF the primary load fails to find a match. Can be enabled / disabled using enable_audio_codec_substitutions: true in the service call. Read more about this under Configurable Variables heading.
-  - Status updates are available by reading the attributes of a new sensor called sensor.ezbeq_load_status. 
+  - Status updates are available by reading the attributes of a new sensor called sensor.ezbeq_load_status. Now with quite detailed attributes for the load including the MV volume change. This can be used to set (or limit) the volume on your amplifier through Denon / Marantz or other AVR brand integrations.
+  - Status of the MiniDSP device you have ezBEQ connected to through the attributes of sensor.ezbeq_devices.
 
 ## Example Images
 ### No profile loaded
@@ -130,6 +131,7 @@ The below definitions are given as exmaples when using Tautulli Active Streams H
   {% endif %}
 {% endif %}
 ```
+
 #### Release Year (name: sensor.ezbeq_tv_year)
 ```yaml
 {{ state_attr('sensor.plex_session_1_tautulli', 'year') | string }}
@@ -172,7 +174,6 @@ data:
 ## Adding Automations - Examples
 
 You can use the below examples for loading BEQ profiles and unloading them.
-
 
 ### Loading
 The reason to use the audio track for executing changes is to simplify the loading code: by detecting change, we unload and then try to load again. This happens when starting a stream, changing audio tracks or stopping a stream.
@@ -274,7 +275,39 @@ STATE VALUES
 - Load Success
 - Load Fail (the reason field will be populated with the reason for the failure)
 
+The available attributes for the ezbeq_load_status sensor is as follows:
+
+### `sensor.ezbeq_load_status` — attributes (after the update)
+
+| Attribute | Type | Description | When it’s present/updated |
+| --- | --- | --- | --- |
+| `friendly_name` | string | Entity friendly name (“ezBEQ Load Status”). | Always. |
+| `last_changed` | ISO timestamp (UTC) | Time the sensor was last updated. | Every status change. |
+| `stage` | string | One of `idle`, `loading_primary`, `loading_secondary`, `load_success`, `load_fail`, `unloading`, `unload_success`, `unload_fail`. | Every status change. |
+| `profile` | string | Title supplied in the service call. | Loading stages and load/unload outcomes. |
+| `codec` | string | Codec actually used for the load (after any substitutions). | Loading stages and load outcomes. |
+| `edition` | string | Edition value from the service call. | Loading stages and load outcomes. |
+| `slots` | list[int] | MiniDSP slots targeted. | All load/unload stages. |
+| `author` | string | BEQ author (from catalogue, best-effort). | On `load_success`. |
+| `reason` | string | Error text. | On `load_fail` / `unload_fail`. |
+| `tmdb_id` | string | TheMovieDB ID from catalogue. | On `load_success` (when matched). |
+| **New** `title` | string | Catalogue title. | On `load_success` (when matched). |
+| **New** `alt_title` | string | Alternate title. | On `load_success` (when matched). |
+| **New** `source` | string | Source medium (e.g., Disc). | On `load_success` (when matched). |
+| **New** `content_type` | string | Content type (e.g., film). | On `load_success` (when matched). |
+| **New** `language` | string | Primary language. | On `load_success` (when matched). |
+| **New** `mv_offset` | float or null | Main-volume offset in dB (from catalogue `mv`). | On `load_success` (when matched). |
+| **New** `audio_types` | list[string] | Audio types from catalogue (e.g., Atmos, TrueHD 5.1). | On `load_success` (when matched). |
+| **New** `warning` | string | Warning text from catalogue. | On `load_success` (when matched). |
+| **New** `note` | string | Note text from catalogue. | On `load_success` (when matched). |
+| **New** `image1` | string | First image URL (if available). | On `load_success` (when matched). |
+| **New** `image2` | string | Second image URL (if available). | On `load_success` (when matched). |
+| **New** `runtime_minutes` | int or null | Runtime in minutes. | On `load_success` (when matched). |
+| **New** `genres` | list[string] | Genres from catalogue. | On `load_success` (when matched). |
+| **New** `created_at` | int or null | Catalogue creation timestamp (epoch seconds). | On `load_success` (when matched). |
+
 You can add the following markdown card onto the dashboard to display the loading status and its attributes. Delete the lines you don't want to see.
+Option 1: Simple YAML
 
 ```yaml
 type: markdown
@@ -288,7 +321,36 @@ content: |
   **Updated:** {{ state_attr('sensor.ezbeq_load_status', 'last_changed') 
   ```
 
-Alternatively, you can build the same using an entities card.
+Option 2: Full list of attributes including newly added ones:
+
+```yaml
+{% set entity = states.sensor.ezbeq_load_status %} {% set g = entity.attributes if entity is not none else {} %} {% set s = entity.state if entity is not none else 'unknown' %} {% set stage = g.stage if g.stage is defined else 'n/a' %}
+**Stage:** {{ s }} ({{ stage }})
+**Last changed (UTC):** {{ g.last_changed if g.last_changed is defined else 'n/a' }} 
+**Profile:** {{ g.profile if g.profile is defined else 'n/a' }}
+**Codec:** {{ g.codec if g.codec is defined else 'n/a' }}  
+**Edition:** {{ g.edition if g.edition is defined else 'n/a' }}  
+**Slots:** {{ g.slots if g.slots is defined else 'n/a' }}  
+**Author:** {{ g.author if g.author is defined and g.author else 'n/a' }}
+{% if g.reason is defined %} **Reason:** {{ g.reason }} {% endif %}
+---
+**TMDB ID:** {{ g.tmdb_id if g.tmdb_id is defined else 'n/a' }}  
+**Title:** {{ g.title if g.title is defined else 'n/a' }}  
+**Alt title:** {{ g.alt_title if g.alt_title is defined else 'n/a' }} 
+**Source:** {{ g.source if g.source is defined else 'n/a' }}  
+**Content type:** {{ g.content_type if g.content_type is defined else 'n/a' }}  
+**Language:** {{ g.language if g.language is defined else 'n/a' }}  
+**Runtime:** {{ g.runtime_minutes ~ ' min' if g.runtime_minutes is defined and g.runtime_minutes else 'n/a' }}  
+**Genres:** {{ ', '.join(g.genres) if g.genres is defined and g.genres else 'n/a' }}
+**Audio types:** {{ ', '.join(g.audio_types) if g.audio_types is defined and g.audio_types else 'n/a' }}  
+**MV offset:** {{ g.mv_offset ~ ' dB' if g.mv_offset is defined and g.mv_offset is not none else 'n/a' }}  
+**Warning:** {{ g.warning if g.warning is defined and g.warning else '—' }}  
+**Note:** {{ g.note if g.note is defined and g.note else '—' }}  
+**Created at:** {{ g.created_at if g.created_at is defined else 'n/a' }}
+{% if g.image1 is defined and g.image1 %} ![Image 1]({{ g.image1 }}) {% endif %} {% if g.image2 is defined and g.image2 %} ![Image 2]({{ g.image2 }}) {% endif %}
+```
+
+Optoon3 . Alternatively, you can build the same using an entities card (example only lists initial attrinutes)
 
 ```yaml
 type: entities
@@ -318,7 +380,9 @@ entities:
 ```
 
 ### Displaying the BEQ image on the Dashboard
-Use the following YAML to add a dashboard tile to display the BEQ profile image on your dashboard. This is helpful if you'd like to know what EQ is being applied at any moment, along with the profile name.
+You have two options to do this: 
+1. With the new image attributes above.
+2. With a sensor that's specified during load. Use the following YAML to add a dashboard tile to display the BEQ profile image on your dashboard. This is helpful if you'd like to know what EQ is being applied at any moment, along with the profile name.
 
 ```yaml
 type: markdown
@@ -327,6 +391,80 @@ content: |
   <img src="{{ url }}" width="600">
 grid_options:
   columns: full
+```
+
+### Displaying the status of your MiniDSP device
+
+The sensor sensor.ezbeq_devices exposes detailed attributes that will show the status of your MiniDSP device and its slots. Below is an example markdown you can use on your dashboard to display these. Simply cut the attributes you don't want to display. You can also have a look at Developer Tools to display the more detailed attrinutes for your devices and add these in if required.
+
+```yaml
+type: markdown
+title: MiniDSP Status
+content: >
+  **MiniDSP:** `{{ states('sensor.ezbeq_devices') }}`
+
+  **Last refreshed:** {{ state_attr('sensor.ezbeq_devices','last_refreshed') }}
+
+
+  **Master volume:** {{ state_attr('sensor.ezbeq_devices','master_volume') }}
+  dB  
+
+  **Mute:** {{ state_attr('sensor.ezbeq_devices','mute') }}
+
+
+  **Active slot:** {{ state_attr('sensor.ezbeq_devices','active_slot_id') }} –
+  {{ state_attr('sensor.ezbeq_devices','active_slot_title') }}
+
+  * Author: {{ state_attr('sensor.ezbeq_devices','active_slot_author') }}
+
+  * Inputs: {{ state_attr('sensor.ezbeq_devices','active_slot_inputs') }}
+
+  * Outputs: {{ state_attr('sensor.ezbeq_devices','active_slot_outputs') }}
+
+  * Gains: ch1 {{ state_attr('sensor.ezbeq_devices','active_slot_input1_gain')
+  }} dB,
+           ch2 {{ state_attr('sensor.ezbeq_devices','active_slot_input2_gain') }} dB
+  * Mutes: ch1 {{ state_attr('sensor.ezbeq_devices','active_slot_input1_mute')
+  }},
+           ch2 {{ state_attr('sensor.ezbeq_devices','active_slot_input2_mute') }}
+
+  ---
+
+  **Slot 1:** {{ state_attr('sensor.ezbeq_devices','slot1_title') }} (active: {{
+  state_attr('sensor.ezbeq_devices','slot1_active') }})
+
+  * Inputs: {{ state_attr('sensor.ezbeq_devices','slot1_inputs') }}, Outputs: {{
+  state_attr('sensor.ezbeq_devices','slot1_outputs') }}
+
+  * Gains: ch1 {{ state_attr('sensor.ezbeq_devices','slot1_input1_gain') }} dB,
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot1_input2_gain') }} dB
+  * Mutes: ch1 {{ state_attr('sensor.ezbeq_devices','slot1_input1_mute') }},
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot1_input2_mute') }}
+
+  **Slot 2:** {{ state_attr('sensor.ezbeq_devices','slot2_title') }} (active: {{
+  state_attr('sensor.ezbeq_devices','slot2_active') }})
+
+  * Gains: ch1 {{ state_attr('sensor.ezbeq_devices','slot2_input1_gain') }} dB,
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot2_input2_gain') }} dB
+  * Mutes: ch1 {{ state_attr('sensor.ezbeq_devices','slot2_input1_mute') }},
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot2_input2_mute') }}
+
+  **Slot 3:** {{ state_attr('sensor.ezbeq_devices','slot3_title') }} (active: {{
+  state_attr('sensor.ezbeq_devices','slot3_active') }})
+
+  * Gains: ch1 {{ state_attr('sensor.ezbeq_devices','slot3_input1_gain') }} dB,
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot3_input2_gain') }} dB
+  * Mutes: ch1 {{ state_attr('sensor.ezbeq_devices','slot3_input1_mute') }},
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot3_input2_mute') }}
+
+  **Slot 4:** {{ state_attr('sensor.ezbeq_devices','slot4_title') }} (active: {{
+  state_attr('sensor.ezbeq_devices','slot4_active') }})
+
+  * Gains: ch1 {{ state_attr('sensor.ezbeq_devices','slot4_input1_gain') }} dB,
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot4_input2_gain') }} dB
+  * Mutes: ch1 {{ state_attr('sensor.ezbeq_devices','slot4_input1_mute') }},
+           ch2 {{ state_attr('sensor.ezbeq_devices','slot4_input2_mute') }}
+
 ```
 
 ## Configurable variables within the code (in folder integrations/ezbeq)
