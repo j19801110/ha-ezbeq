@@ -10,7 +10,7 @@ New Features:
   - Ability to pull the main BEQ image from the database and dispay it on the dashboard (requires a new text input helper called 'ezbeq_tv_beq_image_url' so it becomes input_text.ezbeq_tv_beq_image_url).
   - Ability to search the catalogue based on audio codec substitutions defined in services.py IF the primary load fails to find a match. Can be enabled / disabled using enable_audio_codec_substitutions: true in the service call. Read more about this under Configurable Variables heading.
   - Status updates are available by reading the attributes of a new sensor called sensor.ezbeq_load_status. Now with quite detailed attributes for the load including the MV volume change. This can be used to set (or limit) the volume on your amplifier through Denon / Marantz or other AVR brand integrations.
-  - Status of the MiniDSP device you have ezBEQ connected to through the attributes of sensor.ezbeq_devices.
+  - See the full status of the MiniDSP device you have ezBEQ connected to, through the attributes of sensor.ezbeq_devices.
 
 ## Example Images
 ### No profile loaded
