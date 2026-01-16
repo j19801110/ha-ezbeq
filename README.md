@@ -190,8 +190,6 @@ conditions:
     entity_id: input_boolean.ezbeq_enable
     state: "on"
 actions:
-  - data:
-      image_sensor: input_text.ezbeq_tv_beq_image_url
     action: ezbeq.unload_beq_profile
   - delay: "00:00:05"
   - data:
@@ -203,7 +201,6 @@ actions:
         - 1
       dry_run_mode: false
       skip_search: false
-      image_sensor: input_text.ezbeq_tv_beq_image_url
       enable_audio_codec_substitutions: false
     action: ezbeq.load_beq_profile
   - data:
@@ -239,8 +236,6 @@ conditions: []
 actions:
   - action: ezbeq.unload_beq_profile
     metadata: {}
-    data:
-      image_sensor: input_text.ezbeq_tv_beq_image_url
   - data:
       entity_id: sensor.master_current_profile
     action: homeassistant.update_entity
