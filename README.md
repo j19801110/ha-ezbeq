@@ -35,7 +35,7 @@ New Features (compared to forked version):
 
 The service call below uses template sensors that need to be created in Home Assistant. Whatever you call your template sensors is what you will need to reference in the service call under Services below.
 
-For example, sensor.apple_tv_tmdb_id needs to be created as a template sensor, and you will need to pull in the TMDB ID from whatever sources you have available in home assistant.
+For example, sensor.ezbeq_tv_tmdb_id needs to be created as a template sensor, and you will need to pull in the TMDB ID from whatever sources you have available in home assistant.
 My recommendation would be to do the following:
 
 1. Install Tautulli into a container on the HAOS install using Portainer (but can be run on your QNAP / NAS in container station or using Docker on any PC)
