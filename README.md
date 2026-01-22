@@ -56,7 +56,7 @@ The below definitions are given as exmaples when using Tautulli Active Streams H
           {{ full_title.split('[')[0] | trim if full_title is not none else 'Unknown' }}
 ```
 
-#### TMDB ID:
+#### TMDB ID (Name: sensor.ezbeq_tmdb_id)
 
 ```yaml
 {% set guids = state_attr('sensor.plex_session_1_tautulli', 'guids') %}
