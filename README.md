@@ -5,7 +5,7 @@ Fixes (compared to original forked version):
 - BEQ Profiles with no MV changes now load normally
 - MV changes are NOT loaded into the MiniDSP by default. However, this is configurable using a variable in _init_.py by setting OVERRIDE_GAINS: bool = False.
 
-New Feature (compared to forked version):
+New Features (compared to forked version):
   - Ability to pull the BEQ images from the database and dispay it on the dashboard (now part of the load status attributes for both images from v3.0.0).
   - Ability to search the catalogue based on audio codec substitutions defined in services.py IF the primary load fails to find a match. Can be enabled / disabled using enable_audio_codec_substitutions: true in the service call. Read more about this under Configurable Variables heading.
   - Status updates are available by reading the attributes of a new sensor called sensor.ezbeq_load_status. Now (v2.0.0) with quite detailed attributes for the load including the MV volume change. This can be used to set (or limit) the volume on your amplifier through Denon / Marantz or other AVR brand integrations.
