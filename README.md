@@ -44,9 +44,9 @@ My recommendation would be to do the following:
 
 ### Example Template Sensor Definitions
 
-Required template sensors the following template sensors are required. While they can be names anything, they must match what you put in the service call that is defined later on in this guide. These template sensors need to provide the data into the service call to help with matching the correct movie. The TMDB ID, Audio codec and Movie Edition are required for matching. The other sensors are optional, but recommneded for troubleshooting at the very least.
+The following template sensors are required for calling the service. While they can be named anything, they must match what you put in the service call that is defined later on in this guide. These template sensors need to provide the data for the service call to help with matching the correct movie. The TMDB ID, Audio codec and Movie Edition are required for matching. The other sensors are optional, but recommneded for troubleshooting at the very least.
 
-The below definitions are given as exmaples when using Tautulli Active Streams Home Assistant integration connected to your Plex server. However, if you are using a Zidoo integration for example, you can define these derived sensors becased on information (sensors) available from that integration.
+The below definitions are given as exmaples when using Tautulli Active Streams Home Assistant integration connected to your Plex media server. However, if you are using a Zidoo integration for example, you can define these derived sensors based on information (sensors) available from that integration.
 
 
 #### Template sensor for Title (Name: sensor.ezbeq_tv_title)
