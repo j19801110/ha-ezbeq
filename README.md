@@ -27,7 +27,7 @@ New Features (compared to forked version):
 <img width="515" height="752" alt="Screenshot 2026-01-11 at 2 57 54 pm" src="https://github.com/user-attachments/assets/0c835265-5cd1-438d-b383-7c0bee860947" />
 
 ## Installation
-1. add the following as a repo into HAOS HACS: GitHub - iloveicedgreentea/ha-ezbeq: a home assistant integration to automate EzBEQ functions
+1. add this as a repo into HAOS HACS.
 2. ezBEQ will appear as an add-on. Download it.
 3. Under Settings --> Devices and Services, add ezBEZ as a service and point it to your ezBEQ instance.
 
